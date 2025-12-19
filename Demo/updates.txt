@@ -1,0 +1,18 @@
+
+Typing dots animation
+Message fade-in
+Copy button per response
+Token usage mini-chart
+
+
+
+
+        # with st.expander("📄 Document Sources & Chunks"):
+        #     if results and results.get("documents"):
+        #         st.write(f"**Reranking IDs:** {relevant_ids}")
+        #         st.divider()
+        #         for idx, doc in enumerate(results["documents"][0][:3]):
+        #             st.caption(f"Chunk {idx+1}")
+        #             st.info(doc)
+        #     else:
+        #         st.write("None")
