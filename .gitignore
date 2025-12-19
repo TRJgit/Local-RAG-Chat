@@ -1,46 +1,19 @@
-# --------------------
-# Python
-# --------------------
 __pycache__/
 *.py[cod]
 *$py.class
-
-# --------------------
-# Virtual Environments
-# --------------------
 rag-app/
 venv/
 .env
 pyvenv.cfg
-
-# --------------------
-# Vector DB / Chroma
-# --------------------
 demo-rag-app/
 demo/
 chroma.sqlite3
 *.sqlite3
-
-# --------------------
-# Streamlit
-# --------------------
 .streamlit/secrets.toml
 .streamlit/.cache/
-
-# --------------------
-# OS files
-# --------------------
 .DS_Store
 Thumbs.db
-
-# --------------------
-# IDE / Editor
-# --------------------
 .vscode/
 .idea/
-
-# --------------------
-# Logs / Temp
-# --------------------
 *.log
 *.tmp
