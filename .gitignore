@@ -17,6 +17,7 @@ pyvenv.cfg
 # Vector DB / Chroma
 # --------------------
 demo-rag-app/
+demo/
 chroma.sqlite3
 *.sqlite3
 
