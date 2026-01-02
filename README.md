@@ -12,7 +12,7 @@ A RAG-based chatbot using Ollama models with Chroma DB for vector database and D
 
 ### Note
 
-This app is inspired by the work of [yankeexe](https://github.com/yankeexe "null") and their [reranker-based RAG app demo](https://github.com/yankeexe/llm-rag-with-reranker-demo "null").
+This app is inspired by the work of [yankeexe](https://github.com/yankeexe) and their [reranker-based RAG app demo](https://github.com/yankeexe/llm-rag-with-reranker-demo).
 
 **Features:**
 
@@ -33,8 +33,13 @@ cd Local-RAG-Chat
 **Create a virtual environment (venv)**:
 
 ```
-python -m venv "name of the venv"
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv venv
+
+# Activate on Windows:
+venv\Scripts\activate
+
+# Activate on MacOS/Linux:
+source venv/bin/activate
 ```
 
 **Install all dependencies from requirements.txt**:
@@ -45,7 +50,7 @@ pip install -r requirements.txt
 
 **Ollama Setup**:
 
-- Download and install Ollama from the [official library](https://ollama.com/library "null").
+- Download and install Ollama from the [official library](https://ollama.com/library).
 
 - Pull a sample LLM (e.g., Gemma 3 4B):
 
@@ -55,7 +60,7 @@ ollama pull gemma3:4b
 
 **Embedding Model and Reranker**:
 
-The embedding model [`nomic-embed-text:v1.5`](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2 "null") and the reranker model [`cross-encoder/ms-marco-MiniLM-L-6-v2`](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2 "null")
+The embedding model [`nomic-embed-text:v1.5`](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5) and the reranker model [`cross-encoder/ms-marco-MiniLM-L-6-v2`](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2)
 will download automatically on the first run.
 
 **Run the application**:
