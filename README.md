@@ -26,8 +26,8 @@ This app is inspired by the work of [yankeexe](https://github.com/yankeexe "null
 **Clone the repo**:
 
 ```
-git clone [https://github.com/TRJgit/Local-RAG-Chat-.git](https://github.com/TRJgit/Local-RAG-Chat-.git)
-cd Local-RAG-Chat-
+git clone https://github.com/TRJgit/Local-RAG-Chat.git
+cd Local-RAG-Chat
 ```
 
 **Create a virtual environment (venv)**:
