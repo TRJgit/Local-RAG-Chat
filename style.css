@@ -1,0 +1,121 @@
+/* Global App Styling */
+.stApp {
+    background-color: #212121;
+    color: #FAFAFA;
+}
+
+/* Centering the main content area */
+.block-container {
+    max-width: 850px;
+    padding-top: 2rem;
+    padding-bottom: 10rem;
+}
+
+/* Sidebar Styling */
+[data-testid="stSidebar"] {
+    background-color: #191919;
+    border-right: 1px solid #333333;
+}
+
+/* Input Container Centering */
+.stChatInputContainer {
+    max-width: 950px;
+    margin: 0 auto;
+    background-color: #212121;
+}
+
+/* Chat Messages Polishing with Fade-in Animation */
+.stChatMessage {
+    background-color: #2b2b2b;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    position: relative;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stChatMessage [data-testid="stMarkdownContainer"] p {
+    color: #FAFAFA;
+}
+
+/* Custom Stats Bar Styling
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 15px 0;
+    margin-right: 12px;
+    padding: 12px;
+    background-color: #191919;
+    border-left: 4px solid #DB3434;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #FAFAFA;
+}*/
+
+/* Typing Dots Animation */
+.typing-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #DB3434;
+    border-radius: 50%;
+    animation: typingAnimation 1.4s infinite;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-10px);
+    }
+}
+/* Expander Styling */
+.streamlit-expanderHeader {
+    background-color: #191919 !important;
+    color: #FAFAFA !important;
+    border: 1px solid #333333 !important;
+}
+/* Buttons Styling */
+.stButton>button {
+    border-radius: 6px;
+    border: 1px solid #3d3d3d;
+    transition: all 0.2s ease;
+}
+
+.stButton>button:hover {
+    border-color: #DB3434 !important;
+    color: #DB3434 !important;
+}
