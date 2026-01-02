@@ -6,18 +6,22 @@ import docx
 import time
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.documents import Document
-from sentence_transformers import CrossEncoder
+from sentence_transformers import CrossEncoder, SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit.runtime.uploaded_file_manager import UploadedFile
-from system_prompt import system_prompt
 import chromadb
-from chromadb.utils.embedding_functions.ollama_embedding_function import OllamaEmbeddingFunction
+from chromadb.api.types import EmbeddingFunction, Documents, Embeddings
 
 USER_AVATAR = "assets/user.png"
 ASSISTANT_AVATAR = "assets/model.png"
 
-st.set_page_config(page_title="Local RAG Chat", page_icon="✨")
-st.title("✨ Local RAG Chat")
+def read_system_prompt():
+    with open("system_prompt.txt", "r") as f:
+        return f.read()
+
+system_prompt = read_system_prompt()
+st.set_page_config(page_title="Local RAG Chat")
+st.title("Local RAG Chat")
 st.divider()
 
 
@@ -34,8 +38,23 @@ def get_reranker():
     return CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 @st.cache_resource
+def get_embedding_model():
+    return SentenceTransformer("nomic-ai/nomic-embed-text-v1", trust_remote_code=True)
+
+@st.cache_resource
 def get_chroma_client():
     return chromadb.PersistentClient(path="./demo-rag-app")
+
+
+class SentenceTransformerEmbeddingFunction(EmbeddingFunction):
+    """Custom embedding function using SentenceTransformer"""
+    def __init__(self, model):
+        self.model = model
+    
+    def __call__(self, input: Documents) -> Embeddings:
+        embeddings = self.model.encode(input)
+        return embeddings
+
 
 def get_available_models():
     try:
@@ -79,11 +98,11 @@ def call_llm(context, prompt, model_name):
             st.session_state["last_metadata"] = full_metadata
 
 def get_vector_collection():
-    ollama_ef = OllamaEmbeddingFunction(url="http://localhost:11434", model_name="nomic-embed-text:v1.5")
+    embedding_function = SentenceTransformerEmbeddingFunction(get_embedding_model())
     client = get_chroma_client()
     return client.get_or_create_collection(
         name="rag-app",
-        embedding_function=ollama_ef,
+        embedding_function=embedding_function,
         metadata={"hnsw:space": "cosine"},
     )
 
@@ -153,130 +172,14 @@ def clear_chat_and_database():
     get_vector_collection()
     st.success("Database cleared!")
 
-st.markdown("""
-<style>
-    /* Global App Styling */
-    .stApp {
-        background-color: #212121;
-        color: #FAFAFA;
-    }
-    /* Centering the main content area */
-    .block-container {
-        max-width: 850px;
-        padding-top: 2rem;
-        padding-bottom: 10rem;
-    }
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {
-        background-color: #191919;
-        border-right: 1px solid #333333;
-    }
-    
-    /* Input Container Centering */
-    .stChatInputContainer {
-        max-width: 950px;
-        margin: 0 auto;
-        background-color: #212121;
-    }
-    
-    /* Chat Messages Polishing with Fade-in Animation */
-    .stChatMessage {
-        background-color: #2b2b2b;
-        border: 1px solid #3d3d3d;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        position: relative;
-        animation: fadeIn 0.5s ease-in;
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .stChatMessage [data-testid="stMarkdownContainer"] p {
-        color: #FAFAFA;
-    }
-    /* Custom Stats Bar Styling */
-    .stats-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        margin: 15px 0;
-        margin-right: 12px;
-        padding: 12px;
-        background-color: #191919;
-        border-left: 4px solid #DB3434;
-        border-radius: 6px;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        color: #FAFAFA;
-    }
-    /* Typing Dots Animation */
-    .typing-dots {
-        display: inline-flex;
-        gap: 4px;
-    }
-    
-    .typing-dots span {
-        width: 8px;
-        height: 8px;
-        background-color: #DB3434;
-        border-radius: 50%;
-        animation: typingAnimation 1.4s infinite;
-    }
-    
-    .typing-dots span:nth-child(1) {
-        animation-delay: 0s;
-    }
-    
-    .typing-dots span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-    
-    .typing-dots span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-    
-    @keyframes typingAnimation {
-        0%, 60%, 100% {
-            opacity: 0.3;
-            transform: translateY(0);
-        }
-        30% {
-            opacity: 1;
-            transform: translateY(-10px);
-        }
-    }
-    /* Expander Styling */
-    .streamlit-expanderHeader {
-        background-color: #191919 !important;
-        color: #FAFAFA !important;
-        border: 1px solid #333333 !important;
-    }
-    /* Buttons Styling */
-    .stButton>button {
-        border-radius: 6px;
-        border: 1px solid #3d3d3d;
-        transition: all 0.2s ease;
-    }
-    
-    .stButton>button:hover {
-        border-color: #DB3434 !important;
-        color: #DB3434 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+
+def app_styling(file_name):
+    with open(file_name) as file:
+        st.markdown(f"<style>{file.read()}</style>", unsafe_allow_html=True)
+
 
 with st.sidebar:    
-    st.header("⚙️ Model Selection")
+    st.header("Model Selection")
     models = get_available_models()
     current_model_idx = models.index(st.session_state.selected_model) if st.session_state.selected_model in models else 0
     st.session_state.selected_model = st.selectbox(
@@ -292,8 +195,9 @@ with st.sidebar:
         st.error("No models found. Please check Ollama installation.")
     
     st.divider()
+
     st.header("Upload Document")
-    uploaded_file = st.file_uploader("📄 Select a file", type=["pdf", "docx", "txt", "md"])
+    uploaded_file = st.file_uploader("Select a file", type=["pdf", "docx", "txt", "md"])
     
     if uploaded_file:
         normalize_name = uploaded_file.name.translate(str.maketrans({"-":"_", ".":"_"}))
@@ -310,22 +214,26 @@ with st.sidebar:
             else: all_splits = split_documents([Document(page_content=text, metadata={"source": file_name})])
         else:
             all_splits = []
-        if all_splits and st.button("📤 Process Document", use_container_width=True):
+        if all_splits and st.button("Process Document", use_container_width=True):
             add_to_collection(all_splits, normalize_name)
-    if st.button("🗑️ Clear Database", type="secondary", use_container_width=True):
+
+    if st.button("Clear Database", type="secondary", use_container_width=True):
         clear_chat_and_database()
-        st.toast("🗑️ Database cleared successfully!", icon="✅")
+        st.toast("Database cleared successfully!")
         time.sleep(0.5)
         st.rerun()
-    if st.button("🧹 Clear Chat History", use_container_width=True):
+
+    if st.button("Clear Chat History", use_container_width=True):
         st.session_state.messages = []
-        st.toast("🧹 Chat history cleared!", icon="✅")
+        st.toast("Chat history cleared!")
         time.sleep(0.5)
         st.rerun()
+
     st.divider()
-    on = st.toggle("⚡ Advanced Parameters", help="Control model creativity and response length")
+
+    on = st.toggle("Advanced Parameters", help="Control model creativity and response length")
     if on:
-        with st.expander("🛠️ Advanced Parameters", expanded=True):
+        with st.expander("Advanced Parameters", expanded=True):
             st.session_state.temperature = st.slider("Temperature", 0.0, 1.0, st.session_state.temperature, 0.01)
             st.session_state.top_p = st.slider("Top P", 0.0, 1.0, st.session_state.top_p, 0.01)
             st.session_state.max_tokens = st.number_input("Max Tokens", 64, 8192, st.session_state.max_tokens, 64)
@@ -355,7 +263,7 @@ if prompt:
             status.update(label="No relevant information found.", state="error")
     
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        start_time = time.time()
+        # start_time = time.time()
         
         response_placeholder = st.empty()
         full_response = ""
@@ -365,17 +273,19 @@ if prompt:
             response_placeholder.markdown(full_response + "▌")
         
         response_placeholder.markdown(full_response)
-        end_time = time.time()
+        # end_time = time.time()
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        metadata = st.session_state.get("last_metadata", {})
-        total_tokens = metadata.get("eval_count", 0)
-        time_taken = (end_time - start_time)
-        throughput = (total_tokens / time_taken) if time_taken > 0 else 0
-        st.markdown(f"""
-        <div class="stats-container">
-            <span>⏱️ Time_Taken: {time_taken:.2f}s</span>
-            <span>📊 Total_Tokens: {total_tokens} tokens</span>
-            <span>🚀 Throughput: {throughput:.1f} t/s</span>
-        </div>
-        """, unsafe_allow_html=True)
+
+        # Performance numerics (Time taken, Tokens used, Thorughput) 
+        # metadata = st.session_state.get("last_metadata", {})
+        # total_tokens = metadata.get("eval_count", 0)
+        # time_taken = (end_time - start_time)
+        # throughput = (total_tokens / time_taken) if time_taken > 0 else 0
+        # st.markdown(f"""
+        # <div class="stats-container">
+        #     <span>Time_Taken: {time_taken:.2f}s</span>
+        #     <span>Total_Tokens: {total_tokens} tokens</span>
+        #     <span>Throughput: {throughput:.1f} t/s</span>
+        # </div>
+        # """, unsafe_allow_html=True)
